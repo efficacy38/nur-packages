@@ -16,10 +16,6 @@
       packages = forAllSystems (
         system: nixpkgs.lib.filterAttrs (_: v: nixpkgs.lib.isDerivation v) self.legacyPackages.${system}
       );
-      nixosModules."kopia" = {
-        import = [
-          ./modules/kopia
-        ];
-      };
+      nixosModules = import ./modules;
     };
 }
