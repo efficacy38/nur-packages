@@ -1,3 +1,3 @@
 {
-  kopia = ./kopia.nix;
+  kopia = ./kopia;
 }
