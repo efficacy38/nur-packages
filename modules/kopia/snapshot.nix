@@ -44,6 +44,13 @@ in
               User = "${instance.user}";
               WorkingDirectory = "~";
               SetLoginEnvironment = true;
+              # retry on failure
+              Restart = "on-failure";
+              # wait 30 seconds before restarting
+              RestartSec = "30";
+              # limit the number of restarts to 5 in 1 day
+              StartLimitIntervalSec = "1d";
+              StartLimitBurst = "5";
             };
           };
       in
