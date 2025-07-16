@@ -76,6 +76,40 @@ in
   };
 
   config = {
+    # warn user that specifiy password in repository is not recommended, use secretFiles instead
+    warnings = lib.lists.flatten (
+      lib.attrsets.mapAttrsToList (
+        name: instance:
+        (
+          (lib.optional
+            (
+              instance.repository != null
+              && (lib.hasAttr "s3" instance.repository || lib.hasAttr "azure" instance.repository)
+              && (instance.password != null)
+            )
+            "Kopia repository '${name}' has a password set directly. It is recommended to use 'passwordFile' instead to prevent password is visable at /nix/store."
+          )
+          ++ (lib.optional
+            (
+              lib.hasAttr "s3" instance.repository
+              && lib.hasAttr "accessKey" instance.repository.s3
+              && instance.repository.s3.accessKey != null
+            )
+            "Kopia repository '${name}' has an access key set directly. It is recommended to use 'accessKeyFile' instead to prevent access key is visable at /nix/store."
+          )
+          ++ (lib.optional
+            (
+              lib.hasAttr "s3" instance.repository
+              && lib.hasAttr "secretKey" instance.repository.s3
+              && instance.repository.s3.secretKey != null
+            )
+            "Kopia repository '${name}' has a secret key set directly. It is recommended to use 'secretKeyFile' instead to prevent secret key is visable at /nix/store."
+          )
+        )
+        # s3 related
+      ) config.services.kopia.instances
+    );
+
     # systemd service for repositories open
     systemd.services =
       let
@@ -98,11 +132,7 @@ in
               ]
             else
               throw "Unsupported repository type for Kopia instance ${name}"
-          )
-          ++ [
-            "--password"
-            instance.password
-          ];
+          );
 
         mkRepository =
           let
