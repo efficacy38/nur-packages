@@ -39,7 +39,7 @@ config = {
 
 #### RoadMap
 - [x] policy
-- [ ] global policy
+- [x] global policy
 - [ ] let kopia snapshot on btrfs or zfs's snapshot
 - [ ] webui setup
 - [ ] add other instance type 
