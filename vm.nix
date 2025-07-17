@@ -35,6 +35,32 @@
             # s3.accessKeyFile = "/etc/kopia/accessKey";
             # s3.secretKeyFile = "/etc/kopia/secretKey";
           };
+
+          policy = {
+            # retention = {
+            #   keepLatest = 5;
+            #   keepHourly = 48;
+            #   keepDaily = 7;
+            #   keepWeekly = 4;
+            #   keepMonthly = 3;
+            #   keepAnnual = 0;
+            # };
+
+            # compression = {
+            #   compressorName = "pgzip";
+            #   neverCompress = [
+            #     "*.zip"
+            #     "*.tar"
+            #     "*.gz"
+            #     "*.tgz"
+            #     "*.xz"
+            #     "*.bz2"
+            #     "*.7z"
+            #     "*.rar"
+            #     "*.iso"
+            #   ];
+            # };
+          };
         };
       };
     };

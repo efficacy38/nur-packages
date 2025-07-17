@@ -38,7 +38,7 @@ config = {
 ```
 
 #### RoadMap
-- [ ] policy
+- [x] policy
 - [ ] global policy
 - [ ] let kopia snapshot on btrfs or zfs's snapshot
 - [ ] webui setup
@@ -47,3 +47,9 @@ config = {
    - [ ] `b2`
    - [ ] `azure`
    - [ ] ...
+
+### Develop with nixos-shell
+
+define the module's options at `vm.nix`, then run `nixos-shell` to activate the vm
+
+check [wiki](https://nixos.wiki/wiki/Nixos-shell) or its project [README](https://github.com/Mic92/nixos-shell) to find more
