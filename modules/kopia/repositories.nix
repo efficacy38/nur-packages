@@ -75,7 +75,7 @@ in
     type = lib.types.attrsOf instanceType;
   };
 
-  config = {
+  config = lib.mkIf config.services.kopia.enabled {
     # warn user that specifiy password in repository is not recommended, use secretFiles instead
     warnings = lib.lists.flatten (
       lib.attrsets.mapAttrsToList (

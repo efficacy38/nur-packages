@@ -41,6 +41,7 @@ in
     enabled = lib.mkEnableOption "Enable Kopia backup";
     instances = lib.mkOption {
       type = lib.types.attrsOf instanceType;
+      default = { };
     };
   };
 }

@@ -293,7 +293,7 @@ in
     };
   };
 
-  config = {
+  config = lib.mkIf config.services.kopia.enabled {
     systemd.services = lib.recursiveUpdate { } (
       lib.attrsets.mapAttrs' mkInstancePolicyService config.services.kopia.instances
     );
