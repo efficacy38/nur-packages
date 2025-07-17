@@ -1,26 +1,3 @@
-# nur-packages-template
-
-**A template for [NUR](https://github.com/nix-community/NUR) repositories**
-
-## Setup
-
-1. Click on [Use this template](https://github.com/nix-community/nur-packages-template/generate) to start a repo based on this template. (Do _not_ fork it.)
-2. Add your packages to the [pkgs](./pkgs) directory and to
-   [default.nix](./default.nix)
-   * Remember to mark the broken packages as `broken = true;` in the `meta`
-     attribute, or travis (and consequently caching) will fail!
-   * Library functions, modules and overlays go in the respective directories
-3. Choose your CI: Depending on your preference you can use github actions (recommended) or [Travis ci](https://travis-ci.com).
-   - Github actions: Change your NUR repo name and optionally add a cachix name in [.github/workflows/build.yml](./.github/workflows/build.yml) and change the cron timer
-     to a random value as described in the file
-   - Travis ci: Change your NUR repo name and optionally your cachix repo name in 
-   [.travis.yml](./.travis.yml). Than enable travis in your repo. You can add a cron job in the repository settings on travis to keep your cachix cache fresh
-5. Change your travis and cachix names on the README template section and delete
-   the rest
-6. [Add yourself to NUR](https://github.com/nix-community/NUR#how-to-add-your-own-repository)
-
-## README template
-
 # nur-packages
 
 **My personal [NUR](https://github.com/nix-community/NUR) repository**
@@ -30,3 +7,43 @@
 
 [![Cachix Cache](https://img.shields.io/badge/cachix-efficacy38-blue.svg)](https://efficacy38.cachix.org)
 
+## Modules
+
+### Kopia
+
+#### How to use this kopia module
+
+```
+config = {
+   services.kopia = {
+   enabled = true;
+   instances = {
+      s3 = {
+         enabled = true;
+         # password = "test";
+         passwordFile = "/test/";
+         path = "/tmp/";
+         repository = {
+         s3.bucket = "test-kopia";
+         s3.endpoint = "s3.amazonaws.com";
+         # s3.accessKey = "**************";
+         # s3.secretKey = "**************";
+         s3.accessKeyFile = "/etc/kopia/accessKey";
+         s3.secretKeyFile = "/etc/kopia/secretKey";
+         };
+      };
+   };
+   };
+}
+```
+
+#### RoadMap
+- [ ] policy
+- [ ] global policy
+- [ ] let kopia snapshot on btrfs or zfs's snapshot
+- [ ] webui setup
+- [ ] add other instance type 
+   - [ ] `kopia`, allow this kopia instance push snapshot to remote kopia server
+   - [ ] `b2`
+   - [ ] `azure`
+   - [ ] ...
