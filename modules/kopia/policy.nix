@@ -186,93 +186,100 @@ let
                 description = "Maximum file size to compress.";
               };
             };
-          };
 
-          metadataCompression = {
-            compressorName = lib.mkOption {
-              type = lib.types.enum [
-                "none"
-                "deflate-best-compression"
-                "deflate-best-speed"
-                "deflate-default"
-                "gzip"
-                "gzip-best-compression"
-                "gzip-best-speed"
-                "pgzip"
-                "pgzip-best-compression"
-                "pgzip-best-speed"
-                "s2-better"
-                "s2-default"
-                "s2-parallel-4"
-                "s2-parallel-8"
-                "zstd"
-                "zstd-better-compression"
-                "zstd-fastest"
-              ];
-              default = "zstd-fastest";
-              description = "Name of the compressor to use.";
-            };
-          };
-
-          splitter = {
-            algorithm = lib.mkOption {
-              type = lib.types.nullOr lib.types.str;
-              default = null;
-              description = "Name of the splitter algorithm to use.";
-            };
-          };
-
-          # FIXME: add action definition afterward (maybe implement it during implement at zfs, btrfs snapshot)
-
-          osSnapshots = {
-            volumeShadowCopy = {
-              enable = lib.mkOption {
-                type = lib.types.nullOr lib.types.strMatching "never|always|when-available|inherit";
-                default = false;
-                description = "Enable volume shadow copy";
+            metadataCompression = {
+              compressorName = lib.mkOption {
+                type = lib.types.enum [
+                  "none"
+                  "deflate-best-compression"
+                  "deflate-best-speed"
+                  "deflate-default"
+                  "gzip"
+                  "gzip-best-compression"
+                  "gzip-best-speed"
+                  "pgzip"
+                  "pgzip-best-compression"
+                  "pgzip-best-speed"
+                  "s2-better"
+                  "s2-default"
+                  "s2-parallel-4"
+                  "s2-parallel-8"
+                  "zstd"
+                  "zstd-better-compression"
+                  "zstd-fastest"
+                ];
+                default = "zstd-fastest";
+                description = "Name of the compressor to use.";
               };
             };
-          };
 
-          logging = {
-            directories = {
-              snapshotted = lib.mkOption {
+            splitter = {
+              algorithm = lib.mkOption {
+                type = lib.types.nullOr lib.types.str;
+                default = null;
+                description = "Name of the splitter algorithm to use.";
+              };
+            };
+
+            # FIXME: add action definition afterward (maybe implement it during implement at zfs, btrfs snapshot)
+
+            osSnapshots = {
+              volumeShadowCopy = {
+                enable = lib.mkOption {
+                  type = lib.types.nullOr (
+                    lib.types.enum [
+                      "never"
+                      "always"
+                      "when-available"
+                      "inherit"
+                    ]
+                  );
+                  default = null;
+                  description = "Enable volume shadow copy";
+                };
+              };
+            };
+
+            logging = {
+              directories = {
+                snapshotted = lib.mkOption {
+                  type = lib.types.nullOr lib.types.int;
+                  default = null;
+                  description = "Log detail when a directory is snapshotted";
+                };
+                ignored = lib.mkOption {
+                  type = lib.types.nullOr lib.types.int;
+                  default = null;
+                  description = "Log detail when a directory is ignored";
+                };
+              };
+
+              entries = {
+                snapshotted = lib.mkOption {
+                  type = lib.types.nullOr lib.types.int;
+                  default = null;
+                  description = "Log detail when an entry is snapshotted";
+                };
+                ignored = lib.mkOption {
+                  type = lib.types.nullOr lib.types.int;
+                  default = null;
+                  description = "Log detail when an entry is ignored";
+                };
+              };
+            };
+
+            upload = {
+              # maxParallelSnapshots - GUI only
+              maxParallelFileReads = lib.mkOption {
                 type = lib.types.nullOr lib.types.int;
                 default = null;
-                description = "Log detail when a directory is snapshotted";
+                description = "Maximum number of parallel file reads(GUI Only)";
               };
-              ignored = lib.mkOption {
+              parallelUploadAboveSize = lib.mkOption {
                 type = lib.types.nullOr lib.types.int;
                 default = null;
-                description = "Log detail when a directory is ignored";
+                description = "Use parallel uploads above size(GUI Only)";
               };
-            };
-
-            entries = {
-              snapshotted = lib.mkOption {
-                type = lib.types.nullOr lib.types.int;
-                default = null;
-                description = "Log detail when an entry is snapshotted";
-              };
-              ignored = lib.mkOption {
-                type = lib.types.nullOr lib.types.int;
-                default = null;
-                description = "Log detail when an entry is ignored";
-              };
-            };
-          };
-
-          upload = {
-            # maxParallelSnapshots - GUI only
-            maxParallelFileReads = lib.mkOption {
-              type = lib.types.nullOr lib.types.int;
-              default = null;
-              description = "Maximum number of parallel file reads(GUI Only)";
-            };
-            parallelUploadAboveSize = lib.mkOption {
-              type = lib.types.nullOr lib.types.int;
-              default = null;
-              description = "Use parallel uploads above size(GUI Only)";
             };
           };
         };
