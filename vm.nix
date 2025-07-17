@@ -22,6 +22,11 @@
 
     services.kopia = {
       enabled = true;
+      globalPolicy = {
+        compression = {
+          compressorName = "pgzip";
+        };
+      };
       instances = {
         s3 = {
           enabled = true;
