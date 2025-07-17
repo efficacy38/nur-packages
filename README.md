@@ -43,7 +43,7 @@ config = {
 - [ ] let kopia snapshot on btrfs or zfs's snapshot
 - [ ] webui setup
 - [ ] add other instance type 
-      - [ ] `kopia`, allow this kopia instance push snapshot to remote kopia server
-      - [ ] `b2`
-      - [ ] `azure`
-      - [ ] ...
+   - [ ] `kopia`, allow this kopia instance push snapshot to remote kopia server
+   - [ ] `b2`
+   - [ ] `azure`
+   - [ ] ...
