@@ -34,6 +34,7 @@ in
   imports = [
     ./repositories.nix
     ./snapshot.nix
+    ./policy.nix
   ];
 
   options.services.kopia = {

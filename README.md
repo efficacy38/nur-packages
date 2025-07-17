@@ -38,7 +38,7 @@ config = {
 ```
 
 #### RoadMap
-- [ ] policy
+- [x] policy
 - [ ] global policy
 - [ ] let kopia snapshot on btrfs or zfs's snapshot
 - [ ] webui setup
