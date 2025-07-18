@@ -3,7 +3,10 @@
   "extends": [
     "config:recommended"
   ],
+  "lockFileMaintenance": {
+    "enabled": true,
+  },
   "nix": {
-    "enable": true
+    "enabled": true
   }
 }
