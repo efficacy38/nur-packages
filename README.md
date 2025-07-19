@@ -38,6 +38,9 @@ config = {
 ```
 
 #### RoadMap
+- [x] setup repository
+- [x] setup snapshot and run it periodically with systemd timer
+- [x] close repository after snapshot is done
 - [x] policy
 - [x] global policy
 - [ ] let kopia snapshot on btrfs or zfs's snapshot

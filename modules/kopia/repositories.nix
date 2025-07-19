@@ -134,69 +134,117 @@ in
               throw "Unsupported repository type for Kopia instance ${name}"
           );
 
+        mkDisconnectRepository =
+          name: instance:
+          lib.attrsets.nameValuePair "kopia-repository-${name}-disconnect" {
+            description = "Kopia S3 repository disconnect service";
+            script = ''
+              ${pkgs.kopia}/bin/kopia repository disconnect
+            '';
+            serviceConfig = {
+              Type = "oneshot";
+              User = "${instance.user}";
+              WorkingDirectory = "~";
+              SetLoginEnvironment = true;
+            };
+          };
+
         mkRepository =
           let
             nullToEmpty = val: if val == null then "" else val;
+            mkS3Repository =
+              name: instance:
+              lib.attrsets.nameValuePair "kopia-repository-${name}" {
+                description = "Kopia S3 repository service";
+                wantedBy = [ "multi-user.target" ];
+                script = ''
+                  load_secret() {
+                    local var_name="$1"
+                    local file_value="$2"
+                    local direct_value="$3"
+
+                    if [[ -n "$file_value" ]]; then
+                      export "$var_name"="$(cat $file_value)"
+                    else
+                      export "$var_name"="$direct_value"
+                    fi
+                  }
+
+                  # Load secrets
+                  load_secret "KOPIA_PASSWORD" "${nullToEmpty instance.passwordFile}" "${nullToEmpty instance.password}"
+                  load_secret "AWS_ACCESS_KEY_ID" "${nullToEmpty instance.repository.s3.accessKeyFile}" "${nullToEmpty instance.repository.s3.accessKey}"
+                  load_secret "AWS_SECRET_ACCESS_KEY" "${nullToEmpty instance.repository.s3.secretKeyFile}" "${nullToEmpty instance.repository.s3.secretKey}"
+
+                  # Check required environment variables
+                  for var in KOPIA_PASSWORD AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY; do
+                    if [[ -z "''${!var}" ]]; then
+                      echo "''$var is not set, exiting."
+                      exit 1
+                    fi
+                  done
+
+                  if ! ${pkgs.kopia}/bin/kopia repository connect s3 ${lib.concatStringsSep " " (mkRepositoryArgs name instance)}; then
+                    ${pkgs.kopia}/bin/kopia repository create s3 ${lib.concatStringsSep " " (mkRepositoryArgs name instance)};
+                  fi
+                '';
+                serviceConfig = {
+                  Type = "simple";
+                  User = "${instance.user}";
+                  WorkingDirectory = "~";
+                  SetLoginEnvironment = true;
+                };
+              };
+
+            # FIXME: azure's repository setup is not finished, this is a placeholder
+            mkAzureRepository =
+              name: instance:
+              lib.attrsets.nameValuePair "kopia-repository-${name}" {
+                description = "Kopia Azure repository service";
+                wantedBy = [ "multi-user.target" ];
+                script = ''
+                  load_secret() {
+                    local var_name="$1"
+                    local file_value="$2"
+                    local direct_value="$3"
+
+                    if [[ -n "$file_value" ]]; then
+                      export "$var_name"="$(cat $file_value)"
+                    else
+                      export "$var_name"="$direct_value"
+                    fi
+                  }
+
+                  # Load secrets
+                  load_secret "KOPIA_PASSWORD" "${nullToEmpty instance.passwordFile}" "${nullToEmpty instance.password}"
+
+                  # Check required environment variables
+                  if [[ -z "$KOPIA_PASSWORD" ]]; then
+                    echo "KOPIA_PASSWORD is not set, exiting."
+                    exit 1
+                  fi
+
+                  if ! ${pkgs.kopia}/bin/kopia repository connect azure ${lib.concatStringsSep " " (mkRepositoryArgs name instance)}; then
+                    ${pkgs.kopia}/bin/kopia repository create azure ${lib.concatStringsSep " " (mkRepositoryArgs name instance)};
+                  fi
+                '';
+                serviceConfig = {
+                  Type = "simple";
+                  User = "${instance.user}";
+                  WorkingDirectory = "~";
+                  SetLoginEnvironment = true;
+                };
+              };
           in
           # refactor with mkRepositoryArgs
           name: instance:
           if lib.hasAttr "s3" instance.repository then
-            lib.attrsets.nameValuePair "kopia-repository-${name}" {
-              description = "Kopia S3 repository service";
-              wantedBy = [ "multi-user.target" ];
-              script = ''
-                load_secret() {
-                  local var_name="$1"
-                  local file_value="$2"
-                  local direct_value="$3"
-
-                  if [[ -n "$file_value" ]]; then
-                    export "$var_name"="$(cat $file_value)"
-                  else
-                    export "$var_name"="$direct_value"
-                  fi
-                }
-
-                # Load secrets
-                load_secret "KOPIA_PASSWORD" "${nullToEmpty instance.passwordFile}" "${nullToEmpty instance.password}"
-                load_secret "AWS_ACCESS_KEY_ID" "${nullToEmpty instance.repository.s3.accessKeyFile}" "${nullToEmpty instance.repository.s3.accessKey}"
-                load_secret "AWS_SECRET_ACCESS_KEY" "${nullToEmpty instance.repository.s3.secretKeyFile}" "${nullToEmpty instance.repository.s3.secretKey}"
-
-                # Check required environment variables
-                for var in KOPIA_PASSWORD AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY; do
-                  if [[ -z "''${!var}" ]]; then
-                    echo "''$var is not set, exiting."
-                    exit 1
-                  fi
-                done
-
-                if ! ${pkgs.kopia}/bin/kopia repository connect s3 ${lib.concatStringsSep " " (mkRepositoryArgs name instance)}; then
-                  ${pkgs.kopia}/bin/kopia repository create s3 ${lib.concatStringsSep " " (mkRepositoryArgs name instance)};
-                fi
-              '';
-              serviceConfig = {
-                Type = "simple";
-                User = "${instance.user}";
-                WorkingDirectory = "~";
-                SetLoginEnvironment = true;
-              };
-            }
+            (mkS3Repository name instance)
           else if lib.hasAttr "azure" instance.repository then
-            lib.attrsets.nameValuePair "kopia-repository-${name}" {
-              description = "Kopia Azure repository service";
-              wantedBy = [ "multi-user.target" ];
-              environment = {
-                XDG_CACHE_HOME = "/var/cache";
-              };
-              serviceConfig = {
-                Type = "simple";
-                ExecStart = "${pkgs.kopia}/bin/kopia repository create azure ${lib.concatStringsSep " " (mkRepositoryArgs name instance)}";
-                Restart = "on-failure";
-              };
-            }
+            mkAzureRepository name instance
           else
             throw "Unsupported repository type for Kopia instance ${name}";
       in
-      lib.recursiveUpdate { } (lib.attrsets.mapAttrs' mkRepository config.services.kopia.instances);
+      (lib.attrsets.mapAttrs' mkRepository config.services.kopia.instances)
+      // (lib.attrsets.mapAttrs' mkDisconnectRepository config.services.kopia.instances);
   };
 }
