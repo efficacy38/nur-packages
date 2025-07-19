@@ -76,7 +76,7 @@ in
   };
 
   config = lib.mkIf config.services.kopia.enabled {
-    # warn user that specifiy password in repository is not recommended, use secretFiles instead
+    # warn user that specify password in repository is not recommended, use secretFiles instead
     warnings = lib.lists.flatten (
       lib.attrsets.mapAttrsToList (
         name: instance:
@@ -87,7 +87,7 @@ in
               && (lib.hasAttr "s3" instance.repository || lib.hasAttr "azure" instance.repository)
               && (instance.password != null)
             )
-            "Kopia repository '${name}' has a password set directly. It is recommended to use 'passwordFile' instead to prevent password is visable at /nix/store."
+            "Kopia repository '${name}' has a password set directly. It is recommended to use 'passwordFile' instead to prevent password is visible at /nix/store."
           )
           ++ (lib.optional
             (
@@ -95,7 +95,7 @@ in
               && lib.hasAttr "accessKey" instance.repository.s3
               && instance.repository.s3.accessKey != null
             )
-            "Kopia repository '${name}' has an access key set directly. It is recommended to use 'accessKeyFile' instead to prevent access key is visable at /nix/store."
+            "Kopia repository '${name}' has an access key set directly. It is recommended to use 'accessKeyFile' instead to prevent access key is visible at /nix/store."
           )
           ++ (lib.optional
             (
@@ -103,7 +103,7 @@ in
               && lib.hasAttr "secretKey" instance.repository.s3
               && instance.repository.s3.secretKey != null
             )
-            "Kopia repository '${name}' has a secret key set directly. It is recommended to use 'secretKeyFile' instead to prevent secret key is visable at /nix/store."
+            "Kopia repository '${name}' has a secret key set directly. It is recommended to use 'secretKeyFile' instead to prevent secret key is visible at /nix/store."
           )
         )
         # s3 related
@@ -235,7 +235,6 @@ in
                 };
               };
           in
-          # refactor with mkRepositoryArgs
           name: instance:
           if lib.hasAttr "s3" instance.repository then
             (mkS3Repository name instance)
