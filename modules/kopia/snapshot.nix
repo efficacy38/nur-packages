@@ -36,10 +36,8 @@ in
             description = "Kopia S3 snapshot service";
             wants = [
               "kopia-repository-${name}.service"
-              "kopia-repository-${name}-disconnect.service"
             ];
             after = [ "kopia-repository-${name}.service" ];
-            before = [ "kopia-repository-${name}-disconnect.service" ];
             script = ''
               ${pkgs.kopia}/bin/kopia snapshot create ${instance.path} --description "Snapshot for ${name}"
             '';
