@@ -270,9 +270,10 @@ let
     in
     (lib.attrsets.nameValuePair "kopia-policy-${name}" {
       description = "Kopia policy setup";
+      wants = [ "kopia-repository-${name}.service" ];
+      wantedBy = [ "kopia-snapshot-${name}.service" ];
       after = [ "kopia-repository-${name}.service" ];
       before = [ "kopia-snapshot-${name}.service" ];
-      requiredBy = [ "kopia-snapshot-${name}.service" ];
       script = ''
         ${pkgs.kopia}/bin/kopia policy import --from-file=${policyFile}
       '';
