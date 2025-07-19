@@ -39,10 +39,12 @@ config = {
 
 #### RoadMap
 - [x] setup repository
+- [ ] setup repository with different namespace(currently we place kopia config under user's XDG_CONFIG_FILE, change to somewhare to prevent accident access)
 - [x] setup snapshot and run it periodically with systemd timer
 - [x] close repository after snapshot is done
 - [x] policy
 - [x] global policy
+- [ ] add test case
 - [ ] let kopia snapshot on btrfs or zfs's snapshot
 - [ ] webui setup
 - [ ] add other instance type 
