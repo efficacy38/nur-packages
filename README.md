@@ -46,7 +46,7 @@ config = {
 - [x] global policy
 - [ ] add test case
 - [ ] let kopia snapshot on btrfs or zfs's snapshot
-- [ ] webui setup
+- [x] webui setup(kopiaUI)
 - [ ] add other instance type 
    - [ ] `kopia`, allow this kopia instance push snapshot to remote kopia server
    - [ ] `b2`

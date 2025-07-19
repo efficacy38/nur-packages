@@ -33,6 +33,7 @@ in
     ./repositories.nix
     ./snapshot.nix
     ./policy.nix
+    ./web.nix
   ];
 
   options.services.kopia = {
