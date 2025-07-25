@@ -5,7 +5,7 @@
 let
   instanceType = lib.types.submodule {
     options = {
-      enabled = lib.mkEnableOption "Enable Kopia instance";
+      enable = lib.mkEnableOption "Enable Kopia instance";
       password = lib.mkOption {
         type = lib.types.nullOr lib.types.str;
         default = null;
@@ -37,7 +37,7 @@ in
   ];
 
   options.services.kopia = {
-    enabled = lib.mkEnableOption "Enable Kopia backup";
+    enable = lib.mkEnableOption "Enable Kopia backup";
     instances = lib.mkOption {
       type = lib.types.attrsOf instanceType;
       default = { };

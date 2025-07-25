@@ -37,7 +37,7 @@ in
     type = lib.types.attrsOf instanceType;
   };
 
-  config = lib.mkIf config.services.kopia.enabled {
+  config = lib.mkIf config.services.kopia.enable {
     # systemd service for repositories open
     systemd.services =
       let

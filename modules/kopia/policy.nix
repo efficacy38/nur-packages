@@ -294,7 +294,7 @@ in
     };
   };
 
-  config = lib.mkIf config.services.kopia.enabled {
+  config = lib.mkIf config.services.kopia.enable {
     systemd.services = lib.recursiveUpdate { } (
       lib.attrsets.mapAttrs' mkInstancePolicyService config.services.kopia.instances
     );
