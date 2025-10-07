@@ -53,6 +53,9 @@ in
               # limit the number of restarts to 5 in 1 day
               StartLimitIntervalSec = "1d";
               StartLimitBurst = "5";
+              # lower priority
+              Nice = "-19";
+              IOSchedulingClass = "idle";
             };
           };
       in
