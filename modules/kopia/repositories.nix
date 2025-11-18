@@ -205,6 +205,12 @@ in
                     local direct_value="$3"
 
                     if [[ -n "$file_value" ]]; then
+                      # check this script has permission to load credential
+                      if [[ ! -r "$file_value" ]]; then
+                        echo "Cannot read file $file_value for variable $var_name, exiting."
+                        echo "Please make sure the file($file_value) has proper permission to be read by the user($(whoami)) running this service."
+                        exit 1
+                      fi
                       export "$var_name"="$(cat $file_value)"
                     else
                       export "$var_name"="$direct_value"
