@@ -2,6 +2,7 @@
   pkgs,
   lib,
   config,
+  mkInstanceServices,
   ...
 }:
 let
@@ -50,30 +51,15 @@ in
               "kopia-repository-${name}.service"
             ];
             after = [ "kopia-repository-${name}.service" ];
-            script =
-              let
-                nullToEmpty = val: if val == null then "" else val;
-              in
-              ''
-                load_secret() {
-                  local var_name="$1"
-                  local file_value="$2"
-                  local direct_value="$3"
+            script = ''
+              source ${./load-secret.sh};
+              # Load secrets
+              export KOPIA_SERVER_USERNAME=${instance.web.serverUsername}
+              load_secret "KOPIA_SERVER_PASSWORD" "${if instance.web.serverPasswordFile == null then "" else instance.web.serverPasswordFile}" "${if instance.web.serverPassword == null then "" else instance.web.serverPassword}"
 
-                  if [[ -n "$file_value" ]]; then
-                    export "$var_name"="$(cat $file_value)"
-                  else
-                    export "$var_name"="$direct_value"
-                  fi
-                }
-
-                # Load secrets
-                export KOPIA_SERVER_USERNAME=${instance.web.serverUsername}
-                load_secret "KOPIA_SERVER_PASSWORD" "${nullToEmpty instance.web.serverPasswordFile}" "${nullToEmpty instance.web.serverPassword}"
-
-                # Start Kopia web server
-                ${pkgs.kopia}/bin/kopia server start --insecure --address ${instance.web.guiAddress}
-              '';
+              # Start Kopia web server
+              ${pkgs.kopia}/bin/kopia server start --insecure --address ${instance.web.guiAddress}
+            '';
             serviceConfig = {
               Type = "simple";
               User = "${instance.user}";
@@ -88,13 +74,6 @@ in
               StartLimitBurst = "5";
             };
           };
-        mkInstanceServices =
-          instances:
-          serviceCreator:
-          lib.pipe instances [
-            (lib.attrsets.mapAttrs' serviceCreator)
-            (lib.recursiveUpdate { })
-          ];
       in
       mkInstanceServices config.services.kopia.instances mkWebService;
   };

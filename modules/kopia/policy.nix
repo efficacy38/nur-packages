@@ -2,6 +2,7 @@
   pkgs,
   lib,
   config,
+  mkInstanceServices,
   ...
 }:
 let
@@ -284,14 +285,6 @@ let
         SetLoginEnvironment = true;
       };
     });
-
-  mkInstanceServices =
-    instances:
-    serviceCreator:
-    lib.pipe instances [
-      (lib.attrsets.mapAttrs' serviceCreator)
-      (lib.recursiveUpdate { })
-    ];
 in
 {
   options.services.kopia = {

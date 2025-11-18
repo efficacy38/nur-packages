@@ -2,6 +2,7 @@
   pkgs,
   lib,
   config,
+  mkInstanceServices,
   ...
 }:
 let
@@ -142,7 +143,6 @@ in
 
         mkRepository =
           let
-            nullToEmpty = val: if val == null then "" else val;
             mkS3Repository =
               name: instance:
               lib.attrsets.nameValuePair "kopia-repository-${name}" {
@@ -150,22 +150,12 @@ in
                 serviceConfig =
                   let
                     startScript = pkgs.writeShellScript "start-repository.sh" ''
-                      load_secret() {
-                        local var_name="$1"
-                        local file_value="$2"
-                        local direct_value="$3"
-
-                        if [[ -n "$file_value" ]]; then
-                          export "$var_name"="$(cat $file_value)"
-                        else
-                          export "$var_name"="$direct_value"
-                        fi
-                      }
+                      source ${./load-secret.sh}
 
                       # Load secrets
-                      load_secret "KOPIA_PASSWORD" "${nullToEmpty instance.passwordFile}" "${nullToEmpty instance.password}"
-                      load_secret "AWS_ACCESS_KEY_ID" "${nullToEmpty instance.repository.s3.accessKeyFile}" "${nullToEmpty instance.repository.s3.accessKey}"
-                      load_secret "AWS_SECRET_ACCESS_KEY" "${nullToEmpty instance.repository.s3.secretKeyFile}" "${nullToEmpty instance.repository.s3.secretKey}"
+                      load_secret "KOPIA_PASSWORD" "${if instance.passwordFile == null then "" else instance.passwordFile}" "${if instance.password == null then "" else instance.password}"
+                      load_secret "AWS_ACCESS_KEY_ID" "${if instance.repository.s3.accessKeyFile == null then "" else instance.repository.s3.accessKeyFile}" "${if instance.repository.s3.accessKey == null then "" else instance.repository.s3.accessKey}"
+                      load_secret "AWS_SECRET_ACCESS_KEY" "${if instance.repository.s3.secretKeyFile == null then "" else instance.repository.s3.secretKeyFile}" "${if instance.repository.s3.secretKey == null then "" else instance.repository.s3.secretKey}"
 
                       # Check required environment variables
                       for var in KOPIA_PASSWORD AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY; do
@@ -201,26 +191,10 @@ in
               lib.attrsets.nameValuePair "kopia-repository-${name}" {
                 description = "Kopia Azure repository service";
                 script = ''
-                  load_secret() {
-                    local var_name="$1"
-                    local file_value="$2"
-                    local direct_value="$3"
-
-                    if [[ -n "$file_value" ]]; then
-                      # check this script has permission to load credential
-                      if [[ ! -r "$file_value" ]]; then
-                        echo "Cannot read file $file_value for variable $var_name, exiting."
-                        echo "Please make sure the file($file_value) has proper permission to be read by the user($(whoami)) running this service."
-                        exit 1
-                      fi
-                      export "$var_name"="$(cat $file_value)"
-                    else
-                      export "$var_name"="$direct_value"
-                    fi
-                  }
+                  source ${./load-secret.sh}
 
                   # Load secrets
-                  load_secret "KOPIA_PASSWORD" "${nullToEmpty instance.passwordFile}" "${nullToEmpty instance.password}"
+                  load_secret "KOPIA_PASSWORD" "${if instance.passwordFile == null then "" else instance.passwordFile}" "${if instance.password == null then "" else instance.password}"
 
                   # Check required environment variables
                   if [[ -z "$KOPIA_PASSWORD" ]]; then
@@ -239,22 +213,19 @@ in
                   SetLoginEnvironment = true;
                 };
               };
+            dispatch = {
+              s3 = mkS3Repository;
+              azure = mkAzureRepository;
+            };
           in
           name: instance:
-          if lib.hasAttr "s3" instance.repository then
-            (mkS3Repository name instance)
-          else if lib.hasAttr "azure" instance.repository then
-            mkAzureRepository name instance
+          let
+            repoType = builtins.head (lib.attrNames instance.repository);
+          in
+          if lib.hasAttr repoType dispatch then
+            dispatch.${repoType} name instance
           else
             throw "Unsupported repository type for Kopia instance ${name}";
-
-        mkInstanceServices =
-          instances:
-          serviceCreator:
-          lib.pipe instances [
-            (lib.attrsets.mapAttrs' serviceCreator)
-            (lib.recursiveUpdate { })
-          ];
       in
       mkInstanceServices config.services.kopia.instances mkRepository;
   };

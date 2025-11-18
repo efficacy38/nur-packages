@@ -1,5 +1,6 @@
 {
   lib,
+  pkgs,
   ...
 }:
 let
@@ -23,13 +24,25 @@ let
       };
     };
   };
+  mkInstanceServices =
+    instances:
+    serviceCreator:
+    lib.pipe instances [
+      (lib.attrsets.mapAttrs' serviceCreator)
+      (lib.recursiveUpdate { })
+    ];
 in
 {
   imports = [
-    ./repositories.nix
-    ./snapshot.nix
-    ./policy.nix
-    ./web.nix
+    {
+      _module.args.mkInstanceServices = mkInstanceServices;
+      imports = [
+        ./repositories.nix
+        ./snapshot.nix
+        ./policy.nix
+        ./web.nix
+      ];
+    }
   ];
 
   options.services.kopia = {

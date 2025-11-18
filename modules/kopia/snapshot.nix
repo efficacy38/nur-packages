@@ -2,6 +2,7 @@
   pkgs,
   lib,
   config,
+  mkInstanceServices,
   ...
 }:
 let
@@ -27,13 +28,6 @@ in
 
   config = lib.mkIf config.services.kopia.enable (
     let
-      mkInstanceServices =
-        instances:
-        serviceCreator:
-        lib.pipe instances [
-          (lib.attrsets.mapAttrs' serviceCreator)
-          (lib.recursiveUpdate { })
-        ];
       mkSnapshotService =
         # refactor with mkRepositoryArgs
         name: instance:
@@ -56,7 +50,7 @@ in
             # wait 30 seconds before restarting
             RestartSec = "30";
             # limit the number of restarts to 5 in 1 day
-            StartLimitIntervalSec = "1d";
+            StartLimitInterval = "1d";
             StartLimitBurst = "5";
             # lower priority
             Nice = "-19";
