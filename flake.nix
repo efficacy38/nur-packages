@@ -17,5 +17,17 @@
         system: nixpkgs.lib.filterAttrs (_: v: nixpkgs.lib.isDerivation v) self.legacyPackages.${system}
       );
       nixosModules = import ./modules;
+      checks = forAllSystems (
+        system:
+        let
+          pkgs = import nixpkgs { inherit system; };
+          kopiaNioxsTest = pkgs.callPackage ./modules/kopia/test.nix {
+            inherit self pkgs;
+          };
+        in
+        {
+          kopia-test = kopiaNioxsTest;
+        }
+      );
     };
 }

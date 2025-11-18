@@ -21,10 +21,6 @@ let
         default = "root";
         description = "User under which the Kopia instance runs.";
       };
-
-      test = lib.mkOption {
-        default = null;
-      };
     };
   };
 in
