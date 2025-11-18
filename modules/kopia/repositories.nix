@@ -42,6 +42,11 @@ let
         default = "https://s3.amazonaws.com";
         description = "Endpoint for S3 repository.";
       };
+      disableTLS = lib.mkOption {
+        type = lib.types.bool;
+        default = false;
+        description = "Disable TLS for S3 repository.";
+      };
     };
   };
 
@@ -125,6 +130,7 @@ in
                 "--region"
                 instance.repository.s3.region
               ]
+              ++ (lib.optional (instance.repository.s3.disableTLS) "--disable-tls")
             else if lib.hasAttr "azure" instance.repository then
               [
                 "--azure-account-name"
@@ -187,10 +193,6 @@ in
                     ExecStart = "${startScript}";
                     ExecStop = "${stopScript}";
                   };
-
-                unitConfig = {
-                  StopWhenUnneeded = true;
-                };
               };
 
             # FIXME: azure's repository setup is not finished, this is a placeholder
