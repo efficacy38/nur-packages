@@ -284,6 +284,14 @@ let
         SetLoginEnvironment = true;
       };
     });
+
+  mkInstanceServices =
+    instances:
+    serviceCreator:
+    lib.pipe instances [
+      (lib.attrsets.mapAttrs' serviceCreator)
+      (lib.recursiveUpdate { })
+    ];
 in
 {
   options.services.kopia = {
@@ -295,8 +303,6 @@ in
   };
 
   config = lib.mkIf config.services.kopia.enable {
-    systemd.services = lib.recursiveUpdate { } (
-      lib.attrsets.mapAttrs' mkInstancePolicyService config.services.kopia.instances
-    );
+    systemd.services = mkInstanceServices config.services.kopia.instances mkInstancePolicyService;
   };
 }

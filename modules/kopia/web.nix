@@ -88,7 +88,14 @@ in
               StartLimitBurst = "5";
             };
           };
+        mkInstanceServices =
+          instances:
+          serviceCreator:
+          lib.pipe instances [
+            (lib.attrsets.mapAttrs' serviceCreator)
+            (lib.recursiveUpdate { })
+          ];
       in
-      lib.recursiveUpdate { } (lib.attrsets.mapAttrs' mkWebService config.services.kopia.instances);
+      mkInstanceServices config.services.kopia.instances mkWebService;
   };
 }

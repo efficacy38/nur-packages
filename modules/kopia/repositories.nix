@@ -247,7 +247,15 @@ in
             mkAzureRepository name instance
           else
             throw "Unsupported repository type for Kopia instance ${name}";
+
+        mkInstanceServices =
+          instances:
+          serviceCreator:
+          lib.pipe instances [
+            (lib.attrsets.mapAttrs' serviceCreator)
+            (lib.recursiveUpdate { })
+          ];
       in
-      (lib.attrsets.mapAttrs' mkRepository config.services.kopia.instances);
+      mkInstanceServices config.services.kopia.instances mkRepository;
   };
 }

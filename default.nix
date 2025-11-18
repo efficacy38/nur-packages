@@ -10,12 +10,14 @@
   pkgs ? import <nixpkgs> { },
 }:
 
+let
+  packages = import ./pkgs { inherit pkgs; };
+in
 {
   # The `lib`, `modules`, and `overlays` names are special
   lib = import ./lib { inherit pkgs; }; # functions
   modules = import ./modules; # NixOS modules
   overlays = import ./overlays; # nixpkgs overlays
 
-  personal-fhs = pkgs.callPackage ./pkgs/personal-fhs { };
-  personal-script = pkgs.callPackage ./pkgs/personal-scripts { };
-}
+} // packages
+
