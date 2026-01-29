@@ -94,6 +94,16 @@ let
               default = null;
               description = "Stay in parent filesystem when finding files.";
             };
+            ignore = lib.mkOption {
+              type = lib.types.listOf lib.types.str;
+              default = [ ];
+              description = "List of patterns to ignore (glob patterns).";
+            };
+            noParentIgnore = lib.mkOption {
+              type = lib.types.nullOr lib.types.bool;
+              default = null;
+              description = "Do not inherit ignore patterns from parent directories.";
+            };
           };
 
           errorHandling = {
